@@ -12,7 +12,7 @@ class Database{
             try (
             
                 Connection connect = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/employees?", "root", "Wsult123!"); //set up connection to database
+                "jdbc:mysql://localhost:3306/employees?", "root", "Secret"); //set up connection to database
                 
                 Statement stmt = connect.createStatement(); //statement required for talking to SQL
                 
