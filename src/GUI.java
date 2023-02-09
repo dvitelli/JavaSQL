@@ -22,7 +22,6 @@ class GUI extends JFrame implements ActionListener {
     private JTextField lastNameTextField;
     private JTextField jobTitleTextField;
     
-
     void runGUI(){
 
         JFrame frame = new JFrame("Java SQL Test"); //base frame setup
@@ -81,44 +80,85 @@ class GUI extends JFrame implements ActionListener {
     }
     
     @Override
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e){//on press actions
         
         if(e.getSource().equals(searchButton)){
-            System.out.print("Search Button");
             
+            searchUser();
             
         }else if(e.getSource() == addUserButton){
             
-            System.out.print("Add User Button");
+            addUser();
+            
+            
+        }else if(e.getSource() == deleteUserButton){
+            
+            deleteUser();
+            
+        } 
+        
+    }
+    
+    public void searchUser(){
+        
+        System.out.print("Search Button");
+        
+    }
+    
+    
+    public void addUser(){
+        
+        System.out.print("Add User Button");
             
             if(userIDTextField.getText().isEmpty()){
-                
-                
                 
                 System.out.print("Empty");//implement empty error message
                 
             } else if (userIDTextField.getText().length() < 3 || userIDTextField.getText().length() >3) {
                 
                 //error if User ID isnt 3 digits or non numerical
+                System.out.print("User ID must be at least 3 characters long and only numericals.");//implement empty error message
                 
-            } else {
+            } else { // all checks are fine so we can add to database
                 
-               
+                
+                Employee employeeAdd = new Employee(Integer.parseInt(userIDTextField.getText()), 
+                firstNameTextField.getText(), lastNameTextField.getText(), jobTitleTextField.getText());
+                
+                employeeAdd.print();
+                
+                try{
                     
-                // all checks are fine so we can add to database
-                /*Employee employeeAdd = new Employee(Integer.parseInt(userIDTextField.getText()), 
-                firstNameTextField.getText(), lastNameTextField.getText(), jobTitleTextField.getText());*/
                 
+                String query = "insert into employeedata(employeeID, firstName, lastName, jobTitle)" +
+                "VALUES(?, ?, ?, ?)";
+                
+                PreparedStatement statement = con.prepareStatement(query);
+                statement.setInt(1, employeeAdd.employeeId);
+                statement.setString(2, employeeAdd.firstName);
+                statement.setString(3, employeeAdd.lastName);
+                statement.setString(4, employeeAdd.jobTitle);
+                
+                statement.execute();
+                
+             
+            } catch(Exception e){
+                System.out.println("Error!");
+                System.out.println(e.getMessage());
+            }   
+            
             }
-            
-        }else if(e.getSource() == deleteUserButton){
-            System.out.print("Delete User Button");
-            
-            
-        } 
+    
+    }
+    
+    public void deleteUser(){
+        
+        System.out.print("Delete User Button");
         
     }
-}
+    
+    
+} 
 
 
 /*try {Statement stmt = con.createStatement(); //statement required for talking to SQL

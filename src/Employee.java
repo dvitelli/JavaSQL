@@ -24,7 +24,7 @@ public class Employee {
         
     } void print(){
         
-        System.out.format("%s, %s, %s, %s\n", this.employeeId, this.firstName, this.lastName, this.jobTitle);
+        System.out.format("\n%s, %s, %s, %s\n", this.employeeId, this.firstName, this.lastName, this.jobTitle);
         
     } void setID(int IDIn){
         

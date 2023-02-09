@@ -13,13 +13,22 @@ public class Database{
         try {
             
                 connect = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/employees?", "root", "TopSecret"); //set up connection to database
+                "jdbc:mysql://localhost:3306/employees?", "root", "Secret"); //set up connection to database
                 
-                System.out.print("Database Started");
-                
-                
-                    
-                    /*while(rs.next()){
+                System.out.print("Database Started");       
+                          
+                } catch(SQLException exc){
+                    exc.printStackTrace();
+                }
+}
+
+    public static Connection getConnection(){
+        return connect;
+    }
+    
+}
+
+/*while(rs.next()){
                         
                         employeeTest.setID(rs.getInt("employeeID"));
                         employeeTest.setFirstName(rs.getString("firstName"));
@@ -28,18 +37,4 @@ public class Database{
     
                     }
                     
-                    employeeTest.print();*/
-                    
-                    
-                          
-                } catch(SQLException exc){
-                    exc.printStackTrace();
-                }
-    
-}
-
-    public static Connection getConnection(){
-        return connect;
-    }
-    
-}
+                    employeeTest.print();*/    
