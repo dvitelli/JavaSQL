@@ -14,6 +14,7 @@ import java.sql.Connection;
 class GUI extends JFrame implements ActionListener {
     
     private Connection con = Database.getConnection(); //connection to database
+    private JFrame frame = new JFrame("Java SQL Test");
     private JButton searchButton;
     private JButton addUserButton;
     private JButton deleteUserButton;
@@ -24,7 +25,7 @@ class GUI extends JFrame implements ActionListener {
     
     void runGUI(){
 
-        JFrame frame = new JFrame("Java SQL Test"); //base frame setup
+         //base frame setup
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(375, 250);
         frame.setVisible(true);
@@ -112,39 +113,56 @@ class GUI extends JFrame implements ActionListener {
             
             if(userIDTextField.getText().isEmpty()){
                 
-                System.out.print("Empty");//implement empty error message
+                JOptionPane.showMessageDialog(frame, "Employee ID text field can not be empty.", "Error", JOptionPane.ERROR_MESSAGE);//implement empty error message
                 
             } else if (userIDTextField.getText().length() < 3 || userIDTextField.getText().length() >3) {
                 
                 //error if User ID isnt 3 digits or non numerical
-                System.out.print("User ID must be at least 3 characters long and only numericals.");//implement empty error message
+                JOptionPane.showMessageDialog(frame, "User ID must be at least 3 characters long and only numericals.", "Error", JOptionPane.ERROR_MESSAGE);
                 
             } else { // all checks are fine so we can add to database
                 
-                
+                boolean employeeInSystem = false;
                 Employee employeeAdd = new Employee(Integer.parseInt(userIDTextField.getText()), 
                 firstNameTextField.getText(), lastNameTextField.getText(), jobTitleTextField.getText());
                 
                 employeeAdd.print();
                 
-                try{
+                try{//first check if the person is already in the system
                     
-                
-                String query = "insert into employeedata(employeeID, firstName, lastName, jobTitle)" +
-                "VALUES(?, ?, ?, ?)";
-                
-                PreparedStatement statement = con.prepareStatement(query);
-                statement.setInt(1, employeeAdd.employeeId);
-                statement.setString(2, employeeAdd.firstName);
-                statement.setString(3, employeeAdd.lastName);
-                statement.setString(4, employeeAdd.jobTitle);
-                
-                statement.execute();
+                    String checkIfExists = "SELECT 1 FROM employeedata WHERE employeeID = ?";
+                    
+                    PreparedStatement existsCheck = con.prepareStatement(checkIfExists);
+                    existsCheck.setInt(1, employeeAdd.employeeId);
+                    existsCheck.execute();
+                    
+                    System.out.println(employeeInSystem);
+            
+                    if(employeeInSystem){
+                        
+                        
+                        throw new Exception("Employee is already in database.");
+                        
+                        } else {
+                        
+                            String query = "insert into employeedata(employeeID, firstName, lastName, jobTitle)" +
+                            "VALUES(?, ?, ?, ?)";
+                            
+                            PreparedStatement statement = con.prepareStatement(query);
+                            statement.setInt(1, employeeAdd.employeeId);
+                            statement.setString(2, employeeAdd.firstName);
+                            statement.setString(3, employeeAdd.lastName);
+                            statement.setString(4, employeeAdd.jobTitle);
+                            
+                            statement.execute();
+                }
                 
              
             } catch(Exception e){
-                System.out.println("Error!");
-                System.out.println(e.getMessage());
+                
+                JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+              
+                
             }   
             
             }
