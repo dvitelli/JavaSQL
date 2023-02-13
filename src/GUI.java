@@ -7,6 +7,8 @@ import java.sql.*;
 import javax.swing.*;
 import javax.xml.crypto.Data;
 
+import com.mysql.cj.xdevapi.Result;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -102,10 +104,66 @@ class GUI extends JFrame implements ActionListener {
     
     public void searchUser(){
         
-        System.out.print("Search Button");
+        if(userIDTextField.getText().isEmpty()){
+                
+            JOptionPane.showMessageDialog(frame, "Employee ID text field can not be empty.", 
+            "Error", JOptionPane.ERROR_MESSAGE);//implement empty error message
+            
+        } else if (userIDTextField.getText().length() < 3 || userIDTextField.getText().length() >3) {
+            
+            //error if User ID isnt 3 digits or non numerical
+            JOptionPane.showMessageDialog(frame, "User ID must be at least 3 characters long and only numericals.", 
+            "Error", JOptionPane.ERROR_MESSAGE);
+            
+        } else { // all checks are fine so we can add to database
+            
+            boolean employeeInSystem = false;
+            Employee employeeAdd = new Employee(Integer.parseInt(userIDTextField.getText()), 
+            firstNameTextField.getText(), lastNameTextField.getText(), jobTitleTextField.getText());
+            
+            employeeAdd.print();
+            
+            try{//first check if the person is already in the system
+                
+                employeeInSystem = truthCheck(employeeAdd.employeeId);//check if employee exists
+        
+                if(employeeInSystem){
+                    
+                    String getEmployeeInfo = "SELECT * FROM employeedata WHERE employeeID = ?";
+                        
+                        PreparedStatement employeeCheck = con.prepareStatement(getEmployeeInfo);
+                        employeeCheck.setInt(1, employeeAdd.employeeId);
+                        
+                        ResultSet rs = employeeCheck.executeQuery();
+                        while (rs.next()){
+                            employeeAdd.employeeId = rs.getInt("employeeID");
+                            employeeAdd.firstName = rs.getString("firstName");
+                            employeeAdd.lastName = rs.getString("lastName");
+                            employeeAdd.jobTitle = rs.getString("jobTitle");
+                        }
+                
+                        
+                        JOptionPane.showMessageDialog(frame, "EmployeeID: "+employeeAdd.employeeId+"\nFirst Name: "+employeeAdd.firstName+"\nLast Name: "+employeeAdd.lastName+"\nJob Title: "+employeeAdd.jobTitle, 
+                        "Employee Found", JOptionPane.INFORMATION_MESSAGE);
+                        
+                    
+                    } else {
+                        
+                        JOptionPane.showMessageDialog(frame, "This person does not exist in the database.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            
+         
+        } catch(Exception e){
+            
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          
+            
+        } 
         
     }
-    
+        
+    }
     
     public void addUser(){
         
@@ -126,20 +184,11 @@ class GUI extends JFrame implements ActionListener {
                 Employee employeeAdd = new Employee(Integer.parseInt(userIDTextField.getText()), 
                 firstNameTextField.getText(), lastNameTextField.getText(), jobTitleTextField.getText());
                 
-                employeeAdd.print();
-                
                 try{//first check if the person is already in the system
                     
-                    String checkIfExists = "SELECT 1 FROM employeedata WHERE employeeID = ?";
-                    
-                    PreparedStatement existsCheck = con.prepareStatement(checkIfExists);
-                    existsCheck.setInt(1, employeeAdd.employeeId);
-                    existsCheck.execute();
-                    
-                    System.out.println(employeeInSystem);
+                    employeeInSystem = truthCheck(employeeAdd.employeeId);
             
                     if(employeeInSystem){
-                        
                         
                         throw new Exception("Employee is already in database.");
                         
@@ -171,12 +220,91 @@ class GUI extends JFrame implements ActionListener {
     
     public void deleteUser(){
         
-        System.out.print("Delete User Button");
+        if(userIDTextField.getText().isEmpty()){
+                
+            JOptionPane.showMessageDialog(frame, "Employee ID text field can not be empty.", "Error", JOptionPane.ERROR_MESSAGE);//implement empty error message
+            
+        } else if (userIDTextField.getText().length() < 3 || userIDTextField.getText().length() >3) {
+            
+            //error if User ID isnt 3 digits or non numerical
+            JOptionPane.showMessageDialog(frame, "User ID must be at least 3 characters long and only numericals.", "Error", JOptionPane.ERROR_MESSAGE);
+            
+        } else { // all checks are fine so we can add to database
+            
+            boolean employeeInSystem = false;
+            Employee employeeAdd = new Employee(Integer.parseInt(userIDTextField.getText()), 
+            firstNameTextField.getText(), lastNameTextField.getText(), jobTitleTextField.getText());
+            
+            try{//first check if the person is already in the system
+                
+                employeeInSystem = truthCheck(employeeAdd.employeeId);
+        
+                if(employeeInSystem){
+                    
+                    String getEmployeeInfo = "SELECT * FROM employeedata WHERE employeeID = ?";
+                        
+                        PreparedStatement employeeCheck = con.prepareStatement(getEmployeeInfo);
+                        employeeCheck.setInt(1, employeeAdd.employeeId);
+                        
+                        ResultSet rs = employeeCheck.executeQuery();
+                        while (rs.next()){
+                            employeeAdd.employeeId = rs.getInt("employeeID");
+                            employeeAdd.firstName = rs.getString("firstName");
+                            employeeAdd.lastName = rs.getString("lastName");
+                            employeeAdd.jobTitle = rs.getString("jobTitle");
+                        }
+                        
+                        String deleteEmployee = "DELETE FROM employeeData WHERE employeeID =?";
+                        PreparedStatement deleteStatement = con.prepareStatement(deleteEmployee);
+                        deleteStatement.setInt(1, employeeAdd.employeeId);
+                        deleteStatement.execute();
+                        
+                        JOptionPane.showMessageDialog(frame, "EmployeeID: "+employeeAdd.employeeId+"\nFirst Name: "+employeeAdd.firstName+"\nLast Name: "+employeeAdd.lastName+"\nJob Title: "+employeeAdd.jobTitle, 
+                        "Deleted Employee", JOptionPane.INFORMATION_MESSAGE);
+                        
+                        
+                    
+                    } else {
+                    
+                        JOptionPane.showMessageDialog(frame, "This employee does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            
+         
+        } catch(Exception e){
+            
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          
+            
+            }   
+        }
         
     }
     
+
+    public boolean truthCheck(int employeeID){
+        
+        boolean exists = false;
+        
+        try{
+        
+            String checkIfExists = "SELECT 1 FROM employeeData WHERE employeeID=? LIMIT 1";
+            PreparedStatement existsCheck = con.prepareStatement(checkIfExists);
+            existsCheck.setInt(1, employeeID);
+            existsCheck.execute();
+            ResultSet rs = existsCheck.getResultSet();
+            
+            exists = rs.next(); //gets true or false
+                    
+        } catch(Exception e) {
+            
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        return exists;
     
-} 
+    }
+
+}
 
 
 /*try {Statement stmt = con.createStatement(); //statement required for talking to SQL
